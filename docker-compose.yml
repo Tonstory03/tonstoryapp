@@ -1,0 +1,32 @@
+version: '3.4'
+services:
+  build-client:
+    image: test/test-client:1.0.0
+    container_name: test-client
+    volumes:
+        - static-content:/usr/src/client/_build
+    build:
+        dockerfile: Dockerfile
+        context: .
+        args:
+          env: prod 
+
+  proxy-server:
+    image: nginx:stable-alpine
+    volumes:
+      - static-content:/usr/share/nginx/app:ro
+      - ./docker-resources/nginx/prod:/etc/nginx/conf.d:ro
+    ports:
+      - 8080:80
+    container_name: proxy-server
+    depends_on:
+        - build-client
+    restart: on-failure
+
+volumes:
+  static-content:
+
+# networks:
+#   medical_custom:
+#     external: true
+
